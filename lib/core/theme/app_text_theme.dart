@@ -1,0 +1,32 @@
+import 'package:flutter/material.dart';
+
+final class AppTextTheme {
+  AppTextTheme._();
+
+  static TextTheme get textTheme {
+    return const TextTheme(
+      headlineLarge: TextStyle(
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+      ),
+      headlineMedium: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+      ),
+      titleLarge: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 16,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14,
+      ),
+      labelLarge: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}

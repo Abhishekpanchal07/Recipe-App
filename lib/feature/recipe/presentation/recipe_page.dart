@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/connectivity/connectivity_cubit.dart';
 import 'bloc/recipe_bloc.dart';
 import 'bloc/recipe_event.dart';
 import 'bloc/recipe_state.dart';
@@ -72,10 +73,22 @@ class _RecipePageState extends State<RecipePage> {
   }
 
   Future<void> _onRefresh() async {
-    context.read<RecipeBloc>().add(const RefreshRecipes());
+    final completer = Completer<void>();
+
+    context.read<RecipeBloc>().add(RefreshRecipes(completer: completer));
+
+    await completer.future;
   }
 
   void _onSearchChanged(String value) {
+    final connectivityState = context.read<ConnectivityCubit>().state;
+
+    if (!connectivityState.isConnected) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No Internet Connection')));
+      return;
+    }
     _debounce?.cancel();
 
     _debounce = Timer(const Duration(milliseconds: 400), () {
@@ -126,6 +139,7 @@ class _RecipePageState extends State<RecipePage> {
                 ),
 
                 if (state.isOffline) const OfflineBanner(),
+                if (state.isRefreshing) const LinearProgressIndicator(),
 
                 Expanded(
                   child: RefreshIndicator(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 
 abstract class RecipeEvent extends Equatable {
@@ -9,10 +11,6 @@ abstract class RecipeEvent extends Equatable {
 
 class LoadRecipes extends RecipeEvent {
   const LoadRecipes();
-}
-
-class RefreshRecipes extends RecipeEvent {
-  const RefreshRecipes();
 }
 
 class LoadMoreRecipes extends RecipeEvent {
@@ -36,6 +34,7 @@ class LoadRecipesByTag extends RecipeEvent {
   @override
   List<Object?> get props => [tag];
 }
+
 /* class LoadRecipeDetail extends RecipeEvent {
   final int id;
 
@@ -49,4 +48,10 @@ class ClearSearch extends RecipeEvent {
 
   @override
   List<Object?> get props => [];
-} 
+}
+
+class RefreshRecipes extends RecipeEvent {
+  final Completer<void>? completer;
+
+  const RefreshRecipes({this.completer});
+}

@@ -99,7 +99,8 @@ Future<void> initDependencies() async {
     instanceName: 'mainDio',
   ).interceptors.add(sl<RefreshTokenInterceptor>());
   sl.registerLazySingleton<ApiClient>(
-    () => ApiClient(dio: sl<Dio>(instanceName: 'mainDio')),
+    () => ApiClient(dio: sl<Dio>(instanceName: 'mainDio'),
+        connectivityService: sl<ConnectivityService>()),
   );
 
   sl.registerLazySingleton<Connectivity>(
@@ -118,9 +119,7 @@ sl.registerLazySingleton<ConnectivityCubit>(
   ),
 );
 
-  sl.registerLazySingleton<ConnectivityCubit>(
-    () => ConnectivityCubit(sl<ConnectivityService>()),
-  );
+
   sl.registerLazySingleton<HiveService>(() => HiveService());
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(apiClient: sl<ApiClient>()),

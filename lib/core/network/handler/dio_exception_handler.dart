@@ -13,60 +13,64 @@ class DioExceptionHandler {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-      case DioExceptionType.connectionError:
         return const NetworkException();
 
       case DioExceptionType.badResponse:
         return _handleStatusCode(exception);
 
       case DioExceptionType.cancel:
-        return const UnknownException(message: 'Request was cancelled.');
+        return const UnknownException(
+          message: 'Request was cancelled.',
+        );
 
       case DioExceptionType.badCertificate:
-        return const UnknownException(message: 'Invalid server certificate.');
+        return const UnknownException(
+          message: 'Invalid server certificate.',
+        );
 
       case DioExceptionType.transformTimeout:
         return const UnknownException(
           message: 'Response transformation timed out.',
         );
 
+      case DioExceptionType.connectionError:
       case DioExceptionType.unknown:
         return const UnknownException();
     }
   }
 
   static Exception _handleStatusCode(DioException exception) {
-  final statusCode = exception.response?.statusCode;
-  final response = exception.response?.data;
+    final statusCode = exception.response?.statusCode;
+    final response = exception.response?.data;
 
-  String? message;
+    String? message;
 
-  if (response is Map<String, dynamic>) {
-    message = response['message'] as String?;
+    if (response is Map<String, dynamic>) {
+      message = response['message'] as String?;
+    }
+
+    switch (statusCode) {
+      case 400:
+        return UnknownException(
+          message: message ?? 'Bad request.',
+        );
+
+      case 401:
+        return UnauthorizedException(
+          message: message ?? 'Unauthorized.',
+        );
+
+      case 500:
+      case 502:
+      case 503:
+        return ServerException(
+          message: message ?? 'Server error.',
+        );
+
+      default:
+        return UnknownException(
+          message: message ?? 'Something went wrong.',
+        );
+    }
   }
-
-  switch (statusCode) {
-    case 400:
-      return UnknownException(
-        message: message ?? 'Bad request.',
-      );
-
-    case 401:
-      return UnauthorizedException(
-        message: message ?? 'Unauthorized.',
-      );
-
-    case 500:
-    case 502:
-    case 503:
-      return ServerException(
-        message: message ?? 'Server error.',
-      );
-
-    default:
-      return UnknownException(
-        message: message ?? 'Something went wrong.',
-      );
-  }
-}
 }

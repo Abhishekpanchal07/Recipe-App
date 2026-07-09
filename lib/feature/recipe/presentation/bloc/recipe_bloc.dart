@@ -57,31 +57,42 @@ class RecipeBloc extends Bloc<RecipeEvent, RecipeState> {
   }
 
   Future<void> _onRefreshRecipes(
-    RefreshRecipes event,
-    Emitter<RecipeState> emit,
-  ) async {
-    emit(state.copyWith(isRefreshing: true, clearError: true));
+  RefreshRecipes event,
+  Emitter<RecipeState> emit,
+) async {
+  emit(
+    state.copyWith(
+      isRefreshing: true,
+      clearError: true,
+    ),
+  );
 
-    try {
-      final response = await _getRecipesUseCase(
-        skip: 0,
-        limit: state.limit,
-        forceRefresh: true,
-      );
+  try {
+    final response = await _getRecipesUseCase(
+      skip: 0,
+      limit: state.limit,
+      forceRefresh: true,
+    );
 
-      emit(
-        state.copyWith(
-          recipes: response.recipes,
-          total: response.total,
-          skip: response.recipes.length,
-          isRefreshing: false,
-          hasReachedMax: response.recipes.length >= response.total,
-        ),
-      );
-    } catch (e) {
-      _emitError(emit, error: e, isRefreshing: false);
-    }
+    emit(
+      state.copyWith(
+        recipes: response.recipes,
+        total: response.total,
+        skip: response.recipes.length,
+        isRefreshing: false,
+        hasReachedMax: response.recipes.length >= response.total,
+      ),
+    );
+  } catch (e) {
+    _emitError(
+      emit,
+      error: e,
+      isRefreshing: false,
+    );
+  } finally {
+    event.completer?.complete();
   }
+}
 
   Future<void> _onLoadMoreRecipes(
     LoadMoreRecipes event,

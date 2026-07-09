@@ -7,16 +7,11 @@ import 'theme_state.dart';
 class ThemeCubit extends Cubit<ThemeState> {
   final AppPreferences _preferences;
 
-  ThemeCubit({
-    required AppPreferences preferences,
-  })  : _preferences = preferences,
-        super(
-          ThemeState(
-            themeMode: preferences.getThemeMode(),
-          ),
-        );
+  ThemeCubit({required AppPreferences preferences})
+    : _preferences = preferences,
+      super(ThemeState(themeMode: preferences.getThemeMode()));
 
-  Future<void> setTheme(ThemeMode mode) async {
+  /*   Future<void> setTheme(ThemeMode mode) async {
     await _preferences.saveThemeMode(mode);
 
     emit(
@@ -24,6 +19,15 @@ class ThemeCubit extends Cubit<ThemeState> {
         themeMode: mode,
       ),
     );
+  } */
+  Future<void> setTheme(ThemeMode mode) async {
+    debugPrint('Before emit: ${state.themeMode} -> $mode');
+
+    emit(state.copyWith(themeMode: mode));
+
+    debugPrint('After emit: ${state.themeMode}');
+
+    await _preferences.saveThemeMode(mode);
   }
 
   Future<void> toggleTheme() async {

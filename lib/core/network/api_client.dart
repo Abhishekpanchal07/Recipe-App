@@ -1,10 +1,18 @@
 import 'package:dio/dio.dart';
-import 'package:recipe_app/core/network/handler/dio_exception_handler.dart';
+
+import '../connectivity/connectivity_service.dart';
+import '../error/network_exception.dart';
+import '../error/unknown_exception.dart';
+import 'handler/dio_exception_handler.dart';
 
 class ApiClient {
   final Dio _dio;
+  final ConnectivityService _connectivityService;
 
-  ApiClient({required this._dio});
+  ApiClient({
+    required this._dio,
+    required this._connectivityService,
+  });
 
   Future<T> get<T>({
     required String endpoint,
@@ -19,7 +27,7 @@ class ApiClient {
 
       return converter(response.data);
     } on DioException catch (e) {
-      throw DioExceptionHandler.handle(e);
+      throw await _handleException(e);
     }
   }
 
@@ -38,7 +46,7 @@ class ApiClient {
 
       return converter(response.data);
     } on DioException catch (e) {
-      throw DioExceptionHandler.handle(e);
+      throw await _handleException(e);
     }
   }
 
@@ -48,11 +56,14 @@ class ApiClient {
     required T Function(dynamic json) converter,
   }) async {
     try {
-      final response = await _dio.put(endpoint, data: data);
+      final response = await _dio.put(
+        endpoint,
+        data: data,
+      );
 
       return converter(response.data);
     } on DioException catch (e) {
-      throw DioExceptionHandler.handle(e);
+      throw await _handleException(e);
     }
   }
 
@@ -62,11 +73,14 @@ class ApiClient {
     required T Function(dynamic json) converter,
   }) async {
     try {
-      final response = await _dio.patch(endpoint, data: data);
+      final response = await _dio.patch(
+        endpoint,
+        data: data,
+      );
 
       return converter(response.data);
     } on DioException catch (e) {
-      throw DioExceptionHandler.handle(e);
+      throw await _handleException(e);
     }
   }
 
@@ -76,11 +90,30 @@ class ApiClient {
     required T Function(dynamic json) converter,
   }) async {
     try {
-      final response = await _dio.delete(endpoint, data: data);
+      final response = await _dio.delete(
+        endpoint,
+        data: data,
+      );
 
       return converter(response.data);
     } on DioException catch (e) {
-      throw DioExceptionHandler.handle(e);
+      throw await _handleException(e);
     }
+  }
+
+  Future<Exception> _handleException(DioException e) async {
+    if (e.type == DioExceptionType.connectionError) {
+      final isConnected = await _connectivityService.isConnected;
+
+      if (!isConnected) {
+        return const NetworkException();
+      }
+
+      return const UnknownException(
+        message: 'Something went wrong.',
+      );
+    }
+
+    return DioExceptionHandler.handle(e);
   }
 }
